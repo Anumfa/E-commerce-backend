@@ -10,11 +10,11 @@ if (dns.setDefaultResultOrder) {
 }
 
 // Add fallback DNS to prevent ECONNREFUSED during SRV lookup
-try {
-    dns.setServers(['8.8.8.8', '8.8.4.4']);
-} catch (err) {
-    console.error('Failed to set DNS servers:', err);
-}
+// try {
+//     dns.setServers(['8.8.8.8', '8.8.4.4']);
+// } catch (err) {
+//     console.error('Failed to set DNS servers:', err);
+// }
 
 import app from './app.js';
 import connectDB from './Config/db.js';

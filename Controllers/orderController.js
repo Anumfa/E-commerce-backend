@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 export const createOrder = async (req, res) => {
     try {
-        const { customerInfo, orderItems, subtotal, shippingFee, totalPrice } = req.body;
+        const { customerInfo, orderItems, subtotal, shippingFee, totalPrice, paymentMethod, paymentStatus } = req.body;
 
         if (!orderItems || orderItems.length === 0) {
             return res.status(400).json({ success: false, message: 'No order items' });
@@ -14,7 +14,9 @@ export const createOrder = async (req, res) => {
             orderItems,
             subtotal,
             shippingFee,
-            totalPrice
+            totalPrice,
+            paymentMethod: paymentMethod || 'Cash on Delivery',
+            paymentStatus: paymentStatus || 'Pending'
         });
 
         const savedOrder = await order.save();
