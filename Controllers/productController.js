@@ -5,9 +5,7 @@ import mongoose from 'mongoose';
 // Create Product
 export const createProduct = async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ success: false, message: 'Database is not connected' });
-        }
+
 
         let { name, description, quantity, size, color, ptype, price, discount, discountprice, catid } = req.body;
         

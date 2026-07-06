@@ -5,9 +5,7 @@ import mongoose from 'mongoose';
 // Create Category
 export const createCategory = async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ success: false, message: 'Database is not connected' });
-        }
+
 
         const { name } = req.body;
 
@@ -49,9 +47,7 @@ export const createCategory = async (req, res) => {
 // Get All Categories
 export const getCategories = async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ success: false, message: 'Database is not connected' });
-        }
+
         const categories = await Category.find();
         res.status(200).json({ success: true, data: categories });
     } catch (error) {

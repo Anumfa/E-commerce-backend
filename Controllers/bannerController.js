@@ -5,9 +5,7 @@ import mongoose from 'mongoose';
 // Create Banner
 export const createBanner = async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ success: false, message: 'Database is not connected' });
-        }
+
 
         const { title, description } = req.body;
 
