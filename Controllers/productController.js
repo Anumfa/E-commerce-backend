@@ -5,11 +5,19 @@ import mongoose from 'mongoose';
 // Create Product
 export const createProduct = async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ success: false, message: 'Database is not connected' });
+        }
+
         let { name, description, quantity, size, color, ptype, price, discount, discountprice, catid } = req.body;
         
         // Handle discount percentage (e.g., "10%" -> 10)
         if (typeof discount === 'string' && discount.includes('%')) {
             discount = parseFloat(discount.replace('%', ''));
+        }
+
+        if (!catid || !mongoose.Types.ObjectId.isValid(catid)) {
+            return res.status(400).json({ success: false, message: 'Valid category is required' });
         }
 
         // Check if files are present
@@ -18,7 +26,7 @@ export const createProduct = async (req, res) => {
         }
 
         // Upload images to Cloudinary
-        const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer, 'products'));
+        const uploadPromises = req.files.map(file => uploadToCloudinary(file, 'products'));
         const uploadResults = await Promise.all(uploadPromises);
         const imageUrls = uploadResults.map(result => result.secure_url);
 
@@ -122,7 +130,7 @@ export const updateProduct = async (req, res) => {
 
         // If new images are uploaded
         if (req.files && req.files.length > 0) {
-            const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer, 'products'));
+            const uploadPromises = req.files.map(file => uploadToCloudinary(file, 'products'));
             const uploadResults = await Promise.all(uploadPromises);
             updateData.images = uploadResults.map(result => result.secure_url);
         }

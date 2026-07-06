@@ -1,10 +1,19 @@
 import Category from '../Models/categoriesschema.js';
 import { uploadToCloudinary } from '../Utils/uploadimage.js';
+import mongoose from 'mongoose';
 
 // Create Category
 export const createCategory = async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ success: false, message: 'Database is not connected' });
+        }
+
         const { name } = req.body;
+
+        if (!name?.trim()) {
+            return res.status(400).json({ success: false, message: 'Category name is required' });
+        }
         
         let subcategories = [];
         if (req.body.subcategories) {
@@ -18,9 +27,9 @@ export const createCategory = async (req, res) => {
         // With upload.any(), files are in req.files
         const file = req.files ? req.files[0] : null;
 
-        if (!file) return res.status(400).json({ message: 'Image is required' });
+        if (!file) return res.status(400).json({ success: false, message: 'Image is required' });
 
-        const result = await uploadToCloudinary(file.buffer, 'categories');
+        const result = await uploadToCloudinary(file, 'categories');
         
         const newCategory = await Category.create({
             name,
@@ -40,6 +49,9 @@ export const createCategory = async (req, res) => {
 // Get All Categories
 export const getCategories = async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ success: false, message: 'Database is not connected' });
+        }
         const categories = await Category.find();
         res.status(200).json({ success: true, data: categories });
     } catch (error) {
@@ -77,7 +89,7 @@ export const updateCategory = async (req, res) => {
 
         const file = req.files ? req.files[0] : null;
         if (file) {
-            const result = await uploadToCloudinary(file.buffer, 'categories');
+            const result = await uploadToCloudinary(file, 'categories');
             updateData.imageUrl = result.secure_url;
         }
 
@@ -95,7 +107,7 @@ export const deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
         const category = await Category.findByIdAndDelete(id);
-        if (!category) return res.status(404).json({ message: 'Category not found' });
+        if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
 
         res.status(200).json({ success: true, message: 'Category deleted successfully' });
     } catch (error) {

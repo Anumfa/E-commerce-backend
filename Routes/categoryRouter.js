@@ -6,14 +6,14 @@ import {
     updateCategory, 
     deleteCategory 
 } from '../Controllers/categoryController.js';
-import { upload } from '../Utils/uploadimage.js';
+import { handleUpload } from '../Utils/uploadimage.js';
 
 const router = express.Router();
 
-router.post('/create', upload.any(), createCategory);
+router.post('/create', handleUpload, createCategory);
 router.get('/all', getCategories);
 router.get('/:id', getCategoryById);
-router.put('/update/:id', upload.any(), updateCategory);
+router.put('/update/:id', handleUpload, updateCategory);
 router.delete('/delete/:id', deleteCategory);
 
 export default router;

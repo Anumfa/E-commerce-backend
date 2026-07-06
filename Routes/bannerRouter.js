@@ -6,14 +6,14 @@ import {
     updateBanner, 
     deleteBanner 
 } from '../Controllers/bannerController.js';
-import { upload } from '../Utils/uploadimage.js';
+import { handleUpload } from '../Utils/uploadimage.js';
 
 const router = express.Router();
 
-router.post('/create', upload.any(), createBanner);
+router.post('/create', handleUpload, createBanner);
 router.get('/all', getBanners);
 router.get('/:id', getBannerById);
-router.put('/update/:id', upload.any(), updateBanner);
+router.put('/update/:id', handleUpload, updateBanner);
 router.delete('/delete/:id', deleteBanner);
 
 export default router;

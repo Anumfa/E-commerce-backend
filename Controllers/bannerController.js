@@ -5,13 +5,21 @@ import mongoose from 'mongoose';
 // Create Banner
 export const createBanner = async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ success: false, message: 'Database is not connected' });
+        }
+
         const { title, description } = req.body;
+
+        if (!title?.trim() || !description?.trim()) {
+            return res.status(400).json({ success: false, message: 'Title and description are required' });
+        }
         // With upload.any(), files are in req.files
         const file = req.files ? req.files[0] : null;
 
-        if (!file) return res.status(400).json({ message: 'Image is required' });
+        if (!file) return res.status(400).json({ success: false, message: 'Image is required' });
 
-        const result = await uploadToCloudinary(file.buffer, 'banners');
+        const result = await uploadToCloudinary(file, 'banners');
 
         const newBanner = await Banner.create({
             title,
@@ -60,7 +68,7 @@ export const updateBanner = async (req, res) => {
 
         const file = req.files ? req.files[0] : null;
         if (file) {
-            const result = await uploadToCloudinary(file.buffer, 'banners');
+            const result = await uploadToCloudinary(file, 'banners');
             updateData.imageUrl = result.secure_url;
         }
 
@@ -78,7 +86,7 @@ export const deleteBanner = async (req, res) => {
     try {
         const { id } = req.params;
         const banner = await Banner.findByIdAndDelete(id);
-        if (!banner) return res.status(404).json({ message: 'Banner not found' });
+        if (!banner) return res.status(404).json({ success: false, message: 'Banner not found' });
 
         res.status(200).json({ success: true, message: 'Banner deleted successfully' });
     } catch (error) {

@@ -6,14 +6,14 @@ import {
     updateProduct, 
     deleteProduct 
 } from '../Controllers/productController.js';
-import { upload } from '../Utils/uploadimage.js';
+import { handleUpload } from '../Utils/uploadimage.js';
 
 const router = express.Router();
 
-router.post('/create', upload.any(), createProduct);
+router.post('/create', handleUpload, createProduct);
 router.get('/all', getProducts);
 router.get('/:id', getProductById);
-router.put('/update/:id', upload.any(), updateProduct);
+router.put('/update/:id', handleUpload, updateProduct);
 router.delete('/delete/:id', deleteProduct);
 
 export default router;

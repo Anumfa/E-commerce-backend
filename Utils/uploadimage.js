@@ -1,15 +1,17 @@
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
-import dotenv from 'dotenv';
 
-dotenv.config();
+const ensureCloudinaryConfig = () => {
+    if (!process.env.Cloudname || !process.env.Cloudkey || !process.env.Cloudsecret) {
+        throw new Error('Cloudinary credentials are missing in environment variables');
+    }
 
-// Cloudinary Configuration
-cloudinary.config({
-    cloud_name: process.env.Cloudname,
-    api_key: process.env.Cloudkey,
-    api_secret: process.env.Cloudsecret
-});
+    cloudinary.config({
+        cloud_name: process.env.Cloudname,
+        api_key: process.env.Cloudkey,
+        api_secret: process.env.Cloudsecret
+    });
+};
 
 // Multer Storage (Memory)
 const storage = multer.memoryStorage();
@@ -19,18 +21,33 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// Helper function to upload to Cloudinary
-const uploadToCloudinary = (fileBuffer, folder) => {
-    return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: folder },
-            (error, result) => {
-                if (error) return reject(error);
-                resolve(result);
-            }
-        );
-        uploadStream.end(fileBuffer);
+const handleUpload = (req, res, next) => {
+    upload.any()(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ success: false, message: err.message });
+        }
+        next();
     });
 };
 
-export { upload, uploadToCloudinary, cloudinary };
+// Helper function to upload to Cloudinary
+const uploadToCloudinary = (file, folder) => {
+    ensureCloudinaryConfig();
+
+    const buffer = file?.buffer || file;
+    const mimetype = file?.mimetype || 'image/jpeg';
+
+    if (!buffer?.length) {
+        return Promise.reject(new Error('Invalid file buffer'));
+    }
+
+    const dataUri = `data:${mimetype};base64,${buffer.toString('base64')}`;
+
+    return cloudinary.uploader.upload(dataUri, {
+        folder,
+        resource_type: 'auto',
+        timeout: 60000
+    });
+};
+
+export { upload, handleUpload, uploadToCloudinary, cloudinary };
