@@ -11,12 +11,25 @@ import wishlistRouter from './Routes/wishlistRouter.js';
 import orderRouter from './Routes/orderRouter.js';
 import paymentRouter from './Routes/paymentRouter.js';
 
+import connectDB from './Config/db.js';
+
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
+
+// Ensure database is connected for every request in serverless environments
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        console.error('Database connection failed in middleware:', error.message);
+        res.status(500).json({ success: false, message: 'Database connection failed' });
+    }
+});
 
 // Routes
 app.use('/api/banner', bannerRouter);
