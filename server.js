@@ -15,8 +15,10 @@ const startServer = async () => {
     try {
         await connectDB();
     } catch (error) {
-        console.error('Failed to connect to database. Server will not start.');
-        process.exit(1);
+        console.error('Failed to connect to database:', error.message);
+        if (!process.env.VERCEL) {
+            process.exit(1);
+        }
     }
 
     if (!process.env.VERCEL) {

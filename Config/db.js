@@ -21,6 +21,11 @@ const connectDB = async () => {
     }
 
     try {
+        if (mongoose.connection.readyState >= 1) {
+            console.log('MongoDB already connected.');
+            return mongoose.connection;
+        }
+        
         console.log('Connecting to MongoDB...');
         const dbName = getDbNameFromUri(dbUri);
         const conn = await mongoose.connect(dbUri, {
