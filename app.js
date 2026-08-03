@@ -52,6 +52,11 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
+// Suppress favicon 404 noise in logs
+app.get(['/favicon.ico', '/favicon.png', '/favicon.svg'], (req, res) => {
+    res.status(204).end();
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
