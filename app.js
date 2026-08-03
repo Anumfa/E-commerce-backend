@@ -10,6 +10,9 @@ import cartRouter from './Routes/cartRouter.js';
 import wishlistRouter from './Routes/wishlistRouter.js';
 import orderRouter from './Routes/orderRouter.js';
 import paymentRouter from './Routes/paymentRouter.js';
+import dashboardRouter from './Routes/dashboardRouter.js';
+import reviewRouter from './Routes/reviewRouter.js';
+import contactRouter from './Routes/contactRouter.js';
 
 import connectDB from './Config/db.js';
 
@@ -40,6 +43,9 @@ app.use('/api/cart', cartRouter);
 app.use('/api/wishlist', wishlistRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/payment', paymentRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/review', reviewRouter);
+app.use('/api/contact', contactRouter);
 
 // Default Route
 app.get('/', (req, res) => {

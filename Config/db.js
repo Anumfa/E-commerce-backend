@@ -1,8 +1,19 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Use Google DNS for more reliable MongoDB Atlas resolution
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const normalizeMongoUri = (uri) => {
     if (!uri) return uri;
     let normalized = uri.trim().replace(/^["']|["'];?$/g, '');
+    
+    // Fix spaces in the database name part of the URI
+    // E.g. "mongodb://.../project ecommerce?..." -> "mongodb://.../project_ecommerce?..."
+    normalized = normalized.replace(/\/([^/?\s]+(?:\s|%20)[^/?]+)(\?|$)/, (match, p1, p2) => {
+        return '/' + p1.replace(/%20|\s/g, '_') + p2;
+    });
+
     // Trailing slash before query params causes "Invalid namespace" errors
     normalized = normalized.replace(/\/\?/, '?');
     return normalized;
@@ -10,7 +21,12 @@ const normalizeMongoUri = (uri) => {
 
 const getDbNameFromUri = (uri) => {
     const match = uri.match(/mongodb(?:\+srv)?:\/\/[^/]+\/([^/?]+)/);
-    return match?.[1] || undefined;
+    // Remove spaces or replace with underscores in case of typos in Env Vars
+    let dbName = match?.[1] || undefined;
+    if (dbName) {
+        dbName = dbName.replace(/%20|\s/g, '_');
+    }
+    return dbName;
 };
 
 const connectDB = async () => {

@@ -6,9 +6,11 @@ web_modules/
 # Local environment secrets
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+!.env.example
 
 # Log files
 npm-debug.log*

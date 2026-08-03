@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import User from '../Models/userschema.js';
 
-const client = new OAuth2Client(process.env.googlecilentID);
+const client = new OAuth2Client(process.env.googleclientid, process.env.googleclientsecret);
 
 const router = express.Router();
 
@@ -47,7 +47,7 @@ router.post('/google', async (req, res) => {
         const { token } = req.body;
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: process.env.googlecilentID,
+            audience: process.env.googleclientid,
         });
         
         const payload = ticket.getPayload();

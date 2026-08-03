@@ -1,5 +1,52 @@
 import Order from '../Models/Order.js';
+import Product from '../Models/productschema.js';
 import nodemailer from 'nodemailer';
+
+// Get All Orders (for admin)
+export const getOrders = async (req, res) => {
+    try {
+        const orders = await Order.find()
+            .sort({ createdAt: -1 })
+            .populate('orderItems.product', 'name images price')
+            .lean();
+        res.status(200).json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Update Order Status (for admin)
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const validStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status value' });
+        }
+
+        const order = await Order.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        // If status updated to Delivered, update payment status to Completed
+        if (status === 'Delivered') {
+            order.paymentStatus = 'Completed';
+            await order.save();
+        }
+
+        res.status(200).json({ success: true, data: order });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
 export const createOrder = async (req, res) => {
     try {
